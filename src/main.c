@@ -6,8 +6,9 @@
 // lifecycle:
 // 1. Prompt
 // 2. Read input
-// 3. Parse input
-// 4. Execute command
+// 3. Lex input
+// 3. Parse lexed input
+// 4. Interpret parsed input
 // 5. Repeat
 // 6. Cleanup
 
@@ -34,18 +35,59 @@ void prompt_user()
   printf("\033[1;36m%s\033[0m \033[1;32m❯\033[0m ", dir_name);
 }
 
+void lexer(char* command, char **tokens)
+{
+  // remove trailing \n if exists
+  command[strcspn(command, "\n")] = 0;
+
+  // skip leading whitespaces
+  int i = 0;
+  while (command[i] == ' ')
+  {
+    i++;
+  }
+
+  int t = 1; // index for tokens
+
+  // put the first token into the pointer array
+  tokens[0] = &command[i];
+  
+  // lexer
+  int command_length = strlen(command);
+  while (i < command_length)
+  {
+    // convert whitespaces to \0 to terminate strings
+    if (command[i] == ' ' && command[i - 1] != ' ')
+    {
+      command[i] = '\0';
+    }
+
+    // token detected if the previous char is '\0'
+    if ((i > 0 && command[i - 1] == '\0') && command[i] != ' ' && command[i] != '\0')
+    {
+      tokens[t] = &command[i];
+      t++;
+    }
+    i++;
+  }
+
+  // set null ptr at end
+  tokens[t] = NULL;
+}
+
 int main()
 { 
   while (1)
   {
     prompt_user();
 
-    // get command section:
+    // get command
     char command[SIZE];
     fgets(command, SIZE, stdin);
 
-    // remove trailing \n if exists
-    command[strcspn(command, "\n")] = 0;
+    // array of pointers to strings for tokens
+    char *tokens[256];
+    lexer(command, tokens);
   }
 
   return 0;
