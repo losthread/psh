@@ -88,6 +88,11 @@ int main()
     // array of pointers to strings for tokens
     char *tokens[256];
     lexer(command, tokens);
+
+    for (int i = 0; tokens[i] != NULL; i++)
+    {
+      printf("%s\n", tokens[i]);
+    }
   }
 
   return 0;
