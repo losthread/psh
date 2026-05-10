@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+#include <sys/wait.h>
 #define SIZE 1024
 
 // lifecycle:
@@ -75,6 +77,70 @@ void lexer(char* command, char **tokens)
   tokens[t] = NULL;
 }
 
+struct Command {
+  char *command;
+  char *args[128];
+};
+
+void parser(char **tokens, struct Command *cmd)
+{
+  cmd->command = tokens[0];
+
+  int i;
+  for (i = 0; tokens[i] != NULL; i++)
+  {
+    cmd->args[i] = tokens[i];
+  }
+  cmd->args[i] = NULL;
+}
+
+void changeDirectory(char **args)
+{
+  if (args[1] == NULL)
+  {
+    chdir(getenv("HOME"));
+  }
+  else
+  {
+    chdir(args[1]);
+  }
+}
+
+void interpreter(struct Command *cmd)
+{
+  if (strcmp(cmd->command, "exit") == 0)
+  {
+    exit(0);
+  }
+
+  else if (strcmp(cmd->command, "cd") == 0)
+  {
+    changeDirectory(cmd->args);
+  }
+
+  else
+  {
+    // create new process to preserve running shell
+    pid_t pid = fork();
+
+    // child path (command)
+    if (pid == 0)
+    {
+      if (execvp(cmd->command, cmd->args) == -1)
+      {
+        perror("command not found");
+        _exit(1);
+      }
+    }
+    // parent path (shell)
+    else
+    {
+      // shell waits till child process ends
+      wait(NULL);
+    }
+  }
+}
+
 int main()
 { 
   while (1)
@@ -89,10 +155,10 @@ int main()
     char *tokens[256];
     lexer(command, tokens);
 
-    for (int i = 0; tokens[i] != NULL; i++)
-    {
-      printf("%s\n", tokens[i]);
-    }
+    struct Command cmd;
+    parser(tokens, &cmd);
+
+    interpreter(&cmd);
   }
 
   return 0;
