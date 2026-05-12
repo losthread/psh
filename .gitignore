@@ -1,0 +1,14 @@
+# Compiled binary
+src/psh
+
+# Object files
+*.o
+*.out
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
