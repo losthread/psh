@@ -12,7 +12,7 @@ A minimal shell written in C
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/psh.git
+git clone https://github.com/losthread/psh.git
 cd psh
 
 # Quick Install (installation bash script)
